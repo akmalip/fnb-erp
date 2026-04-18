@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { getLiveOrders, getOrdersByOutlet, updateOrderStatus, confirmPayment } from '../../../../lib/supabase/queries'
-import { createClient } from '../../../../lib/supabase/client'
-import { usePushNotifications } from '../../../../hooks/usePushNotifications'
-import type { Order } from '../../../../types'
+import { getLiveOrders, getOrdersByOutlet, updateOrderStatus, confirmPayment } from '@/lib/supabase/queries'
+import { createClient } from '@/lib/supabase/client'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
+import type { Order } from '@/types'
 
 function formatRp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
 function formatTime(s: string) {
