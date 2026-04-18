@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getAllBannersByOutlet, upsertBanner, deleteBanner } from '../../../../lib/supabase/queries'
-import type { OutletBanner } from '../../../../types'
+import { getAllBannersByOutlet, upsertBanner, deleteBanner } from '@/lib/supabase/queries'
+import type { OutletBanner } from '@/types'
 
 const TYPES = [
   { value: 'promo',        label: '💸 Promo / Discount' },
