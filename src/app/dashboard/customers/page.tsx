@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getCustomersByOutlet } from '../../../../lib/supabase/queries'
+import { getCustomersByOutlet } from '@/lib/supabase/queries'
 
 interface CustomerRow {
   id: string; name: string; whatsapp: string; email?: string
