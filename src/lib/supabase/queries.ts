@@ -1,5 +1,5 @@
 import { createClient } from './client'
-import type { Outlet, MenuItem, MenuCategory, OutletBanner, Order, Customer } from '@/types'
+import type { Outlet, MenuItem, MenuCategory, OutletBanner, Order, Customer } from '../../types'
 
 const supabase = createClient()
 
