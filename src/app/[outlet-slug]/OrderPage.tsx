@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Outlet, MenuItem, MenuCategory, OutletBanner, CartItem, CustomerSession } from '@/types'
-import { createClient } from '@/lib/supabase/client'
-import { getBannersByOutlet, getMenuByOutlet, upsertCustomer, createOrder, uploadPaymentProof } from '@/lib/supabase/queries'
+import type { Outlet, MenuItem, MenuCategory, OutletBanner, CartItem, CustomerSession } from '../../types'
+import { createClient } from '../../lib/supabase/client'
+import { getBannersByOutlet, getMenuByOutlet, upsertCustomer, createOrder, uploadPaymentProof } from '../../lib/supabase/queries'
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 
