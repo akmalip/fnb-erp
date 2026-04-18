@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getCustomersByOutlet } from '@/lib/supabase/queries'
+import { getCustomersByOutlet } from '../../../../lib/supabase/queries'
 
 interface CustomerRow {
   id: string; name: string; whatsapp: string; email?: string
@@ -39,7 +39,8 @@ export default function CustomersPage() {
       ['Name', 'WhatsApp', 'Email', 'Visits', 'Total Spent', 'Last Visit'],
       ...filtered.map(c => [c.name, c.whatsapp, c.email ?? '', String(c.visit_count ?? c.total_visits), String(c.total_spent_here ?? c.total_spent), formatDate(c.last_visit_at ?? c.last_visited_at)])
     ]
-    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('
+')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
     a.download = 'customers.csv'; a.click()
