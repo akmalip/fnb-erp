@@ -222,7 +222,8 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
           {initialBanners.length > 0 && (
             <div className="banner-scroll">
               {initialBanners.map(b => (
-                <div key={b.id} className="banner-card">
+                <div key={b.id} className={"banner-card" + ((b as any).has_detail_page ? " tappable" : "")}
+                  onClick={() => { if ((b as any).has_detail_page) window.location.href = `/${outlet.slug}/promo/${b.id}` }}>
                   {b.image_url ? (
                     <div className="banner-img" style={{ backgroundImage: `url(${b.image_url})`, backgroundSize: `${(b as any).image_zoom ?? 100}%`, backgroundPosition: `${(b as any).image_position_x ?? 50}% ${(b as any).image_position_y ?? 50}%`, backgroundRepeat: "no-repeat" }}>
                       {b.title && (
@@ -514,7 +515,7 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
         .outlet-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
         .banner-scroll { display: flex; gap: 12px; padding: 14px 16px; overflow-x: auto; scrollbar-width: none; }
         .banner-scroll::-webkit-scrollbar { display: none; }
-        .banner-card { flex-shrink: 0; width: 280px; border-radius: 12px; overflow: hidden; aspect-ratio: 2/1; }
+        .banner-card { flex-shrink: 0; width: 280px; border-radius: 12px; overflow: hidden; aspect-ratio: 2/1; } .banner-card.tappable { cursor: pointer; } .banner-card.tappable:active { opacity: 0.9; transform: scale(0.98); transition: transform 0.1s; }
         .banner-img { width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; }
         .banner-img-overlay { width: 100%; padding: 10px 12px; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%); }
         .banner-color { width: 100%; height: 100%; display: flex; align-items: center; gap: 10px; padding: 14px; }
