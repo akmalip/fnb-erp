@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getDashboardStats, getOrdersByOutlet } from '@/lib/supabase/queries'
-import type { Order } from '@/types'
+import { getDashboardStats, getOrdersByOutlet } from '../../../lib/supabase/queries'
+import type { Order } from '../../../types'
 
 function formatRp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
 function timeAgo(s: string) {
