@@ -12,8 +12,8 @@
     "next": "15.3.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@supabase/supabase-js": "^2.43.0",
-    "@supabase/ssr": "^0.4.0",
+    "@supabase/supabase-js": "^2.103.3",
+    "@supabase/ssr": "^0.10.2",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
