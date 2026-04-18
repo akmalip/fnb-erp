@@ -201,21 +201,31 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
       {step === 'menu' && (
         <div className="menu-page">
           {/* Hero */}
-          <div className="hero-banner">
+          <div className="hero-banner" style={(outlet as any).header_use_photo && (outlet as any).header_image_url ? {
+              backgroundImage: `url(${(outlet as any).header_image_url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            } : {}}>
+            {/* Overlay for photo mode */}
+            {(outlet as any).header_use_photo && (outlet as any).header_image_url && (
+              <div className="hero-photo-overlay" />
+            )}
             <div className="table-indicator" onClick={() => setStep('table-input')}>
               {tableNumber
                 ? <span>🪑 Meja <strong>{tableNumber}</strong> <span className="edit-hint">ubah</span></span>
                 : <span>📍 Pilih Nomor Meja</span>
               }
             </div>
-            <div className="outlet-logo-wrap">
-              {outlet.logo_url
-                ? <img src={outlet.logo_url} alt={outlet.name} className="outlet-logo-img" />
-                : <div className="outlet-logo-initials">{outlet.name.substring(0,2).toUpperCase()}</div>
-              }
+            <div className="hero-bottom">
+              <div className="outlet-logo-wrap">
+                {outlet.logo_url
+                  ? <img src={outlet.logo_url} alt={outlet.name} className="outlet-logo-img" />
+                  : <div className="outlet-logo-initials">{outlet.name.substring(0,2).toUpperCase()}</div>
+                }
+              </div>
+              <h1 className="outlet-name">{outlet.name}</h1>
+              {outlet.description && <p className="outlet-desc">{outlet.description}</p>}
             </div>
-            <h1 className="outlet-name">{outlet.name}</h1>
-            {outlet.description && <p className="outlet-desc">{outlet.description}</p>}
           </div>
 
           {/* Banners */}
@@ -493,18 +503,39 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
         body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: #FAF7F4; color: #1A0F0A; }
         .menu-page { max-width: 430px; margin: 0 auto; min-height: 100vh; }
         .hero-banner {
-          padding: 24px 20px 28px;
+          padding: 0 20px 0;
           background: linear-gradient(160deg, var(--brand-secondary) 0%, color-mix(in srgb, var(--brand-secondary) 70%, var(--brand-primary)) 100%);
           position: relative;
+          min-height: 220px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .hero-photo-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(160deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 100%);
+          z-index: 0;
+        }
+        .table-indicator {
+          position: relative;
+          z-index: 1;
+          margin-top: 20px;
+          align-self: flex-start;
+        }
+        .hero-bottom {
+          position: relative;
+          z-index: 1;
+          padding: 16px 0 24px;
         }
         .table-indicator {
           display: inline-flex; align-items: center; gap: 6px;
           background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
           border-radius: 20px; padding: 6px 14px; font-size: 13px; color: white;
-          cursor: pointer; margin-bottom: 16px;
+          cursor: pointer; margin-bottom: 0;
         }
         .edit-hint { font-size: 11px; opacity: 0.65; text-decoration: underline; margin-left: 4px; }
-        .outlet-logo-wrap { margin-bottom: 10px; }
+        .outlet-logo-wrap { margin-bottom: 10px; margin-top: 0; }
         .outlet-logo-img { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); }
         .outlet-logo-initials {
           width: 52px; height: 52px; border-radius: 12px; background: var(--brand-primary);
@@ -638,3 +669,4 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
     </div>
   )
 }
+
