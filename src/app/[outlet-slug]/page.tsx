@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '../../lib/supabase/server'
-import { getMenuByOutlet, getBannersByOutlet } from '../../lib/supabase/queries'
+import { createClient } from '@/lib/supabase/server'
+import { getMenuByOutlet, getBannersByOutlet } from '@/lib/supabase/queries'
 import OrderPage from './OrderPage'
 import type { Metadata } from 'next'
 
