@@ -16,25 +16,44 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     const sb = createClient()
-    const { data, error } = await sb.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
+
+    const { data, error: authError } = await sb.auth.signInWithPassword({ email, password })
+    if (authError) {
+      setError(authError.message)
       setLoading(false)
       return
     }
+
     if (data.user) {
-      // Get outlet for this user
-      const { data: outletUser } = await sb
+      // Step 1: get outlet_id from outlet_users
+      const { data: ouData, error: ouError } = await sb
         .from('outlet_users')
-        .select('outlet:outlets(*)')
+        .select('outlet_id, role')
         .eq('user_id', data.user.id)
+        .not('outlet_id', 'is', null)
+        .limit(1)
+
+      if (ouError || !ouData || ouData.length === 0) {
+        setError('No outlet found for this account. Please contact admin.')
+        setLoading(false)
+        return
+      }
+
+      const outletId = ouData[0].outlet_id
+
+      // Step 2: get outlet details
+      const { data: outlet, error: outletError } = await sb
+        .from('outlets')
+        .select('id, slug, name')
+        .eq('id', outletId)
         .single()
-      if (outletUser?.outlet) {
-        const outlet = outletUser.outlet as any
+
+      if (outlet) {
         localStorage.setItem('fnb_outlet_id', outlet.id)
         localStorage.setItem('fnb_outlet_slug', outlet.slug)
         localStorage.setItem('fnb_outlet_name', outlet.name)
       }
+
       router.push('/dashboard')
     }
   }
