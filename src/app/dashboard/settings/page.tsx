@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../../../lib/supabase/client'
-import { getOutletBySlug, updateOutlet } from '../../../../lib/supabase/queries'
-import type { Outlet } from '../../../../types'
+import { createClient } from '@/lib/supabase/client'
+import { getOutletBySlug, updateOutlet } from '@/lib/supabase/queries'
+import type { Outlet } from '@/types'
 
 const FONTS = ['Plus Jakarta Sans','Inter','Poppins','DM Sans','Nunito','Raleway','Lato']
 
