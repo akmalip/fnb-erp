@@ -223,7 +223,7 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
             <div className="banner-scroll">
               {initialBanners.map(b => (
                 <div key={b.id} className="banner-card" style={{ background: b.bg_color }}>
-                  <div className="banner-icon">{b.icon_emoji}</div>
+                  {b.icon_emoji && <div className="banner-icon">{b.icon_emoji}</div>}
                   <div className="banner-text">
                     <div className="banner-title" style={{ color: b.text_color }}>{b.title}</div>
                     {b.description && <div className="banner-desc" style={{ color: b.text_color }}>{b.description}</div>}
