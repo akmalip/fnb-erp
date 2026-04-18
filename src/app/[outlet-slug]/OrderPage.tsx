@@ -222,12 +222,25 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
           {initialBanners.length > 0 && (
             <div className="banner-scroll">
               {initialBanners.map(b => (
-                <div key={b.id} className="banner-card" style={{ background: b.bg_color }}>
-                  {b.icon_emoji && <div className="banner-icon">{b.icon_emoji}</div>}
-                  <div className="banner-text">
-                    <div className="banner-title" style={{ color: b.text_color }}>{b.title}</div>
-                    {b.description && <div className="banner-desc" style={{ color: b.text_color }}>{b.description}</div>}
-                  </div>
+                <div key={b.id} className="banner-card">
+                  {b.image_url ? (
+                    <div className="banner-img" style={{ backgroundImage: `url(${b.image_url})` }}>
+                      {b.title && (
+                        <div className="banner-img-overlay">
+                          <div className="banner-title" style={{ color: b.text_color }}>{b.title}</div>
+                          {b.description && <div className="banner-desc" style={{ color: b.text_color }}>{b.description}</div>}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="banner-color" style={{ background: b.bg_color }}>
+                      {b.icon_emoji && <div className="banner-icon">{b.icon_emoji}</div>}
+                      <div className="banner-text">
+                        <div className="banner-title" style={{ color: b.text_color }}>{b.title}</div>
+                        {b.description && <div className="banner-desc" style={{ color: b.text_color }}>{b.description}</div>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -499,12 +512,13 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
         }
         .outlet-name { font-size: 24px; font-weight: 800; color: white; line-height: 1.1; }
         .outlet-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
-        .banner-scroll { display: flex; gap: 10px; padding: 14px 16px; overflow-x: auto; scrollbar-width: none; }
+        .banner-scroll { display: flex; gap: 12px; padding: 14px 16px; overflow-x: auto; scrollbar-width: none; }
         .banner-scroll::-webkit-scrollbar { display: none; }
-        .banner-card {
-          flex-shrink: 0; width: 230px; border-radius: 12px;
-          padding: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer;
-        }
+        .banner-card { flex-shrink: 0; width: 280px; border-radius: 12px; overflow: hidden; aspect-ratio: 2/1; }
+        .banner-img { width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; }
+        .banner-img-overlay { width: 100%; padding: 10px 12px; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%); }
+        .banner-color { width: 100%; height: 100%; display: flex; align-items: center; gap: 10px; padding: 14px; }
+        
         .banner-icon { font-size: 28px; flex-shrink: 0; }
         .banner-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
         .banner-desc { font-size: 11px; margin-top: 2px; opacity: 0.8; }
