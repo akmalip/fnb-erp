@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getOutletBySlug, updateOutlet } from '@/lib/supabase/queries'
 import type { Outlet } from '@/types'
@@ -25,6 +25,9 @@ export default function SettingsPage() {
   const [uploadingQris, setUploadingQris] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadingHeader, setUploadingHeader] = useState(false)
+  const headerDragging = useRef(false)
+  const headerDragStart = useRef({ x: 0, y: 0, px: 50, py: 50 })
+  const headerPreviewRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const id = localStorage.getItem('fnb_outlet_id')
@@ -79,6 +82,29 @@ export default function SettingsPage() {
     }
     setUploadingHeader(false)
   }
+
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
+    if (!(outlet as any).header_image_url) return
+    headerDragging.current = true
+    headerDragStart.current = {
+      x: e.clientX, y: e.clientY,
+      px: (outlet as any).header_position_x ?? 50,
+      py: (outlet as any).header_position_y ?? 50
+    }
+    e.preventDefault()
+  }
+
+  const handleHeaderMouseMove = (e: React.MouseEvent) => {
+    if (!headerDragging.current || !headerPreviewRef.current) return
+    const rect = headerPreviewRef.current.getBoundingClientRect()
+    const dx = ((e.clientX - headerDragStart.current.x) / rect.width) * -100
+    const dy = ((e.clientY - headerDragStart.current.y) / rect.height) * -100
+    const newX = Math.max(0, Math.min(100, headerDragStart.current.px + dx))
+    const newY = Math.max(0, Math.min(100, headerDragStart.current.py + dy))
+    setOutlet(p => ({ ...p, header_position_x: Math.round(newX), header_position_y: Math.round(newY) } as any))
+  }
+
+  const handleHeaderMouseUp = () => { headerDragging.current = false }
 
   const qrUrl = outlet.slug
     ? `${typeof window !== 'undefined' ? window.location.origin : 'https://yourdomain.com'}/${outlet.slug}`
@@ -153,8 +179,49 @@ export default function SettingsPage() {
                 {(outlet as any).header_use_photo ? (
                   (outlet as any).header_image_url ? (
                     <div>
-                      <div style={{ width: "100%", aspectRatio: "3/1", borderRadius: 10, overflow: "hidden", marginBottom: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
-                        <img src={(outlet as any).header_image_url} alt="header" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <div style={{ fontSize: 11, color: "#8B7355", marginBottom: 6 }}>Drag to reposition · Slider to zoom</div>
+                      <div
+                        ref={headerPreviewRef}
+                        onMouseDown={handleHeaderMouseDown}
+                        onMouseMove={handleHeaderMouseMove}
+                        onMouseUp={handleHeaderMouseUp}
+                        onMouseLeave={handleHeaderMouseUp}
+                        style={{
+                          width: "100%", aspectRatio: "3/1", borderRadius: 10, overflow: "hidden",
+                          marginBottom: 10, border: "1px solid rgba(0,0,0,0.08)",
+                          backgroundImage: `url(${(outlet as any).header_image_url})`,
+                          backgroundSize: `${(outlet as any).header_zoom ?? 100}%`,
+                          backgroundPosition: `${(outlet as any).header_position_x ?? 50}% ${(outlet as any).header_position_y ?? 50}%`,
+                          backgroundRepeat: "no-repeat",
+                          cursor: headerDragging.current ? "grabbing" : "grab",
+                          userSelect: "none",
+                          position: "relative"
+                        }}>
+                        <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", color: "white", fontSize: 10, padding: "3px 7px", borderRadius: 6, pointerEvents: "none" }}>↕ Drag</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#8B7355", minWidth: 40 }}>Zoom</span>
+                        <input type="range" min={100} max={250} step={5}
+                          value={(outlet as any).header_zoom ?? 100}
+                          onChange={e => setOutlet(p => ({ ...p, header_zoom: parseInt(e.target.value) } as any))}
+                          style={{ flex: 1, cursor: "pointer" }} />
+                        <span style={{ fontSize: 11, color: "#8B7355", minWidth: 36, textAlign: "right" }}>{(outlet as any).header_zoom ?? 100}%</span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#8B7355", minWidth: 52 }}>Horizontal</span>
+                          <input type="range" min={0} max={100} step={1}
+                            value={(outlet as any).header_position_x ?? 50}
+                            onChange={e => setOutlet(p => ({ ...p, header_position_x: parseInt(e.target.value) } as any))}
+                            style={{ flex: 1, cursor: "pointer" }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#8B7355", minWidth: 40 }}>Vertical</span>
+                          <input type="range" min={0} max={100} step={1}
+                            value={(outlet as any).header_position_y ?? 50}
+                            onChange={e => setOutlet(p => ({ ...p, header_position_y: parseInt(e.target.value) } as any))}
+                            style={{ flex: 1, cursor: "pointer" }} />
+                        </div>
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
                         <label className="ubtn" style={{ cursor: "pointer" }}>
@@ -162,8 +229,11 @@ export default function SettingsPage() {
                           <input type="file" accept="image/*" style={{ display: "none" }}
                             onChange={e => { const f = e.target.files?.[0]; if (f) uploadHeader(f) }} />
                         </label>
-                        <button className="ubtn" onClick={() => setOutlet(p => ({ ...p, header_image_url: "", header_use_photo: false } as any))}>
+                        <button className="ubtn" onClick={() => setOutlet(p => ({ ...p, header_image_url: "", header_use_photo: false, header_zoom: 100, header_position_x: 50, header_position_y: 50 } as any))}>
                           Remove
+                        </button>
+                        <button className="ubtn" onClick={() => setOutlet(p => ({ ...p, header_zoom: 100, header_position_x: 50, header_position_y: 50 } as any))}>
+                          Reset
                         </button>
                       </div>
                     </div>
