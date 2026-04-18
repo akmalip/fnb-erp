@@ -105,7 +105,7 @@ export default function MenuPage() {
             <button className={`cc ${catFilter === 'all' ? 'active' : ''}`} onClick={() => setCatFilter('all')}>All</button>
             {cats.map(c => (
               <button key={c.id} className={`cc ${catFilter === c.id ? 'active' : ''}`} onClick={() => setCatFilter(c.id)}>
-                {c.emoji} {c.name}
+                {c.emoji ? c.emoji + ' ' : ''}{c.name}
               </button>
             ))}
           </div>
@@ -137,14 +137,14 @@ export default function MenuPage() {
 
       {tab === 'categories' && (
         <>
-          <button className="btn-sec" onClick={() => { setEditCat({ emoji: '☕', sort_order: cats.length }); setShowCatForm(true) }}>
+          <button className="btn-sec" onClick={() => { setEditCat({ emoji: '', sort_order: cats.length }); setShowCatForm(true) }}>
             + Add Category
           </button>
           <div className="cat-list">
             {cats.map(cat => (
               <div key={cat.id} className="crow">
                 <div className="cr-l">
-                  <div className="cemoji">{cat.emoji}</div>
+                  {cat.emoji && <div className="cemoji">{cat.emoji}</div>}
                   <div>
                     <div className="cname">{cat.name}</div>
                     <div className="ccnt">{items.filter(i => i.category_id === cat.id).length} items</div>
@@ -193,7 +193,7 @@ export default function MenuPage() {
               <select className="fi" value={editItem.category_id ?? ''}
                 onChange={e => setEditItem(p => ({ ...p, category_id: e.target.value || undefined }))}>
                 <option value="">— No Category —</option>
-                {cats.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
+                {cats.map(c => <option key={c.id} value={c.id}>{c.emoji ? c.emoji + ' ' : ''}{c.name}</option>)}
               </select>
             </div>
             <div className="fg">
