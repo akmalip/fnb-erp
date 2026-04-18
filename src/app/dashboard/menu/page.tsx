@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getMenuByOutlet, upsertMenuItem, deleteMenuItem, toggleMenuItemAvailability, upsertCategory, deleteCategory } from '../../../../lib/supabase/queries'
-import { createClient } from '../../../../lib/supabase/client'
-import type { MenuItem, MenuCategory } from '../../../../types'
+import { getMenuByOutlet, upsertMenuItem, deleteMenuItem, toggleMenuItemAvailability, upsertCategory, deleteCategory } from '@/lib/supabase/queries'
+import { createClient } from '@/lib/supabase/client'
+import type { MenuItem, MenuCategory } from '@/types'
 
 function formatRp(n: number) { return 'Rp ' + n.toLocaleString('id-ID') }
 
