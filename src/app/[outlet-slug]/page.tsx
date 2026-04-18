@@ -4,19 +4,18 @@ import { getMenuByOutlet, getBannersByOutlet } from '@/lib/supabase/queries'
 import OrderPage from './OrderPage'
 import type { Metadata } from 'next'
 
+// Force dynamic - never pre-render at build time
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ 'outlet-slug': string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { 'outlet-slug': slug } = await params
-  const supabase = await createClient()
-  const { data: outlet } = await supabase
-    .from('outlets').select('name, description').eq('slug', slug).single()
-  if (!outlet) return { title: 'Menu' }
   return {
-    title: `Menu — ${outlet.name}`,
-    description: outlet.description ?? `Order directly from your table at ${outlet.name}`,
+    title: `Menu — ${slug}`,
+    description: 'Order directly from your table',
   }
 }
 
@@ -36,7 +35,9 @@ export default async function OutletPage({ params }: Props) {
         justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: 24
       }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>😴</div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{outlet.name} is Closed</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+          {outlet.name} is Closed
+        </h1>
         <p style={{ color: '#8B7355', fontSize: 14 }}>
           Open again at {outlet.open_time} – {outlet.close_time}
         </p>
