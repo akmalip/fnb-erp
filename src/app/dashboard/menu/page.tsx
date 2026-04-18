@@ -38,7 +38,14 @@ export default function MenuPage() {
   const saveItem = async () => {
     if (!editItem?.name || !editItem?.price) return
     setSaving(true)
-    await upsertMenuItem({ ...editItem, outlet_id: outletId } as any)
+    // Strip out joined 'category' object - not a real column
+    const { category: _cat, ...itemData } = editItem as any
+    const { error } = await upsertMenuItem({ ...itemData, outlet_id: outletId } as any)
+    if (error) {
+      alert('Failed to save: ' + error.message)
+      setSaving(false)
+      return
+    }
     await load(outletId)
     setSaving(false); setShowItemForm(false); setEditItem(null)
   }
@@ -56,7 +63,12 @@ export default function MenuPage() {
   const saveCat = async () => {
     if (!editCat?.name) return
     setSaving(true)
-    await upsertCategory({ ...editCat, outlet_id: outletId } as any)
+    const { error } = await upsertCategory({ ...editCat, outlet_id: outletId } as any)
+    if (error) {
+      alert('Failed to save: ' + error.message)
+      setSaving(false)
+      return
+    }
     await load(outletId)
     setSaving(false); setShowCatForm(false); setEditCat(null)
   }
