@@ -33,7 +33,7 @@ export default function BannersPage() {
   const load = (id: string) => getAllBannersByOutlet(id).then(setBanners)
 
   const openNew = () => {
-    setEditing({ bg_color: '#C8873A', text_color: '#FFFFFF', icon_emoji: '', banner_type: 'promo', is_active: true, sort_order: banners.length })
+    setEditing({ bg_color: '#C8873A', text_color: '#FFFFFF', icon_emoji: '🎉', banner_type: 'promo', is_active: true, sort_order: banners.length })
     setShowForm(true)
   }
 
@@ -75,7 +75,7 @@ export default function BannersPage() {
         {banners.map(b => (
           <div key={b.id} className={`bcard ${!b.is_active ? 'off' : ''}`}>
             <div className="bprev" style={{ background: b.bg_color }}>
-              {b.icon_emoji && <span className="bicon">{b.icon_emoji}</span>}
+              <span className="bicon">{b.icon_emoji}</span>
               <div>
                 <div className="btitle" style={{ color: b.text_color }}>{b.title}</div>
                 {b.description && <div className="bdesc" style={{ color: b.text_color }}>{b.description}</div>}
@@ -106,7 +106,7 @@ export default function BannersPage() {
 
             {/* Live preview */}
             <div className="lprev" style={{ background: editing.bg_color ?? '#C8873A' }}>
-              {editing.icon_emoji && <span style={{ fontSize:28 }}>{editing.icon_emoji}</span>}
+              <span style={{ fontSize:28 }}>{editing.icon_emoji ?? '🎉'}</span>
               <div>
                 <div style={{ color: editing.text_color ?? '#fff', fontWeight: 700, fontSize: 14 }}>{editing.title || 'Banner Title'}</div>
                 <div style={{ color: editing.text_color ?? '#fff', fontSize: 12, opacity: 0.8 }}>{editing.description || 'Short description'}</div>
