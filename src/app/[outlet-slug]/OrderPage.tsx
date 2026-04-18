@@ -224,7 +224,7 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
               {initialBanners.map(b => (
                 <div key={b.id} className="banner-card">
                   {b.image_url ? (
-                    <div className="banner-img" style={{ backgroundImage: `url(${b.image_url})` }}>
+                    <div className="banner-img" style={{ backgroundImage: `url(${b.image_url})`, backgroundSize: `${(b as any).image_zoom ?? 100}%`, backgroundPosition: `${(b as any).image_position_x ?? 50}% ${(b as any).image_position_y ?? 50}%`, backgroundRepeat: "no-repeat" }}>
                       {b.title && (
                         <div className="banner-img-overlay">
                           <div className="banner-title" style={{ color: b.text_color }}>{b.title}</div>
