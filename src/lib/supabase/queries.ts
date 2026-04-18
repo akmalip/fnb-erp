@@ -1,7 +1,9 @@
 import { createClient } from './client'
 import type { Outlet, MenuItem, MenuCategory, OutletBanner, Order, Customer } from '@/types'
 
-const supabase = createClient()
+// Always create fresh client to ensure anon key is included in headers
+function getClient() { return createClient() }
+const supabase = getClient()
 
 // ─── OUTLET ──────────────────────────────────────────────────────────────────
 
@@ -97,7 +99,8 @@ export async function deleteBanner(id: string) {
 export async function upsertCustomer(
   name: string, whatsapp: string, email: string | undefined, outletId: string
 ): Promise<string | null> {
-  const { data, error } = await supabase.rpc('upsert_customer', {
+  const sb = getClient()
+  const { data, error } = await sb.rpc('upsert_customer', {
     p_name: name, p_whatsapp: whatsapp, p_email: email ?? null, p_outlet_id: outletId
   })
   if (error) return null
@@ -127,12 +130,13 @@ export async function createOrder(order: {
   items: { menu_item_id: string; item_name: string; item_price: number; quantity: number; notes?: string }[]
   notes?: string
 }) {
+  const sb = getClient()
   // Generate order number
-  const { data: orderNum } = await supabase.rpc('generate_order_number', { p_outlet_id: order.outlet_id })
+  const { data: orderNum } = await sb.rpc('generate_order_number', { p_outlet_id: order.outlet_id })
 
   const subtotal = order.items.reduce((sum, i) => sum + i.item_price * i.quantity, 0)
 
-  const { data: newOrder, error } = await supabase
+  const { data: newOrder, error } = await sb
     .from('orders')
     .insert({
       outlet_id: order.outlet_id,
@@ -162,7 +166,7 @@ export async function createOrder(order: {
     notes: i.notes
   }))
 
-  await supabase.from('order_items').insert(orderItems)
+  await sb.from('order_items').insert(orderItems)
 
   return { data: newOrder }
 }
