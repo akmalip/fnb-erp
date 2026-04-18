@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [section, setSection] = useState<Section>('brand')
   const [uploadingQris, setUploadingQris] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [uploadingHeader, setUploadingHeader] = useState(false)
 
   useEffect(() => {
     const id = localStorage.getItem('fnb_outlet_id')
@@ -64,6 +65,19 @@ export default function SettingsPage() {
       setOutlet(p => ({ ...p, logo_url: data.publicUrl }))
     }
     setUploadingLogo(false)
+  }
+
+  const uploadHeader = async (file: File) => {
+    setUploadingHeader(true)
+    const sb = createClient()
+    const ext = file.name.split('.').pop()
+    const path = `headers/${outletId}/header.${ext}`
+    const { error } = await sb.storage.from('outlet-assets').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data } = sb.storage.from('outlet-assets').getPublicUrl(path)
+      setOutlet(p => ({ ...p, header_image_url: data.publicUrl, header_use_photo: true } as any))
+    }
+    setUploadingHeader(false)
   }
 
   const qrUrl = outlet.slug
@@ -121,6 +135,57 @@ export default function SettingsPage() {
                 <input className="fi" type="text" value={outlet.name ?? ''} onChange={e => setOutlet(p => ({ ...p, name: e.target.value }))} />
               </div>
               <div className="fg">
+                <label className="fl">Header Background</label>
+                <div style={{ display: "flex", border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
+                  <button onClick={() => setOutlet(p => ({ ...p, header_use_photo: false } as any))}
+                    style={{ flex: 1, padding: "9px 6px", border: "none", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                      background: !(outlet as any).header_use_photo ? "#2C1810" : "white",
+                      color: !(outlet as any).header_use_photo ? "white" : "#8B7355" }}>
+                    Brand Color
+                  </button>
+                  <button onClick={() => setOutlet(p => ({ ...p, header_use_photo: true } as any))}
+                    style={{ flex: 1, padding: "9px 6px", border: "none", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                      background: (outlet as any).header_use_photo ? "#2C1810" : "white",
+                      color: (outlet as any).header_use_photo ? "white" : "#8B7355" }}>
+                    Photo
+                  </button>
+                </div>
+                {(outlet as any).header_use_photo ? (
+                  (outlet as any).header_image_url ? (
+                    <div>
+                      <div style={{ width: "100%", aspectRatio: "3/1", borderRadius: 10, overflow: "hidden", marginBottom: 8, border: "1px solid rgba(0,0,0,0.08)" }}>
+                        <img src={(outlet as any).header_image_url} alt="header" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <label className="ubtn" style={{ cursor: "pointer" }}>
+                          {uploadingHeader ? "Uploading..." : "Replace Photo"}
+                          <input type="file" accept="image/*" style={{ display: "none" }}
+                            onChange={e => { const f = e.target.files?.[0]; if (f) uploadHeader(f) }} />
+                        </label>
+                        <button className="ubtn" onClick={() => setOutlet(p => ({ ...p, header_image_url: "", header_use_photo: false } as any))}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center",
+                      width: "100%", aspectRatio: "3/1", border: "2px dashed rgba(0,0,0,0.12)",
+                      borderRadius: 10, cursor: "pointer", background: "#FAF7F4", textAlign: "center" as const }}>
+                      <div style={{ fontSize: 28, marginBottom: 6 }}>🖼</div>
+                      <div style={{ fontSize: 13, fontWeight: 600 }}>{uploadingHeader ? "Uploading..." : "Upload Header Photo"}</div>
+                      <div style={{ fontSize: 11, color: "#8B7355", marginTop: 4 }}>Recommended: 1440×480px (3:1)</div>
+                      <input type="file" accept="image/*" style={{ display: "none" }}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadHeader(f) }} />
+                    </label>
+                  )
+                ) : (
+                  <div style={{ fontSize: 12, color: "#8B7355", padding: "8px 0" }}>
+                    Header will use your brand color as gradient background.
+                  </div>
+                )}
+              </div>
+
+                            <div className="fg">
                 <label className="fl">Tagline / Description</label>
                 <input className="fi" type="text" placeholder="e.g. Specialty coffee in the heart of Sukabumi"
                   value={outlet.description ?? ''} onChange={e => setOutlet(p => ({ ...p, description: e.target.value }))} />
