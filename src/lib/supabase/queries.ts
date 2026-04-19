@@ -100,11 +100,46 @@ export async function upsertCustomer(
   name: string, whatsapp: string, email: string | undefined, outletId: string
 ): Promise<string | null> {
   const sb = getClient()
+  
+  // Try RPC first
   const { data, error } = await sb.rpc('upsert_customer', {
     p_name: name, p_whatsapp: whatsapp, p_email: email ?? null, p_outlet_id: outletId
   })
-  if (error) return null
-  return data
+  if (!error && data) return data
+
+  // Fallback: direct upsert to customers table
+  try {
+    const { data: existing } = await sb.from('customers')
+      .select('id').eq('whatsapp', whatsapp).single()
+    
+    if (existing?.id) {
+      // Update existing customer
+      await sb.from('customers').update({ name, email: email ?? null }).eq('id', existing.id)
+      // Upsert customer_outlets
+      await sb.from('customer_outlets').upsert({
+        customer_id: existing.id, outlet_id: outletId,
+        last_visit_at: new Date().toISOString()
+      }, { onConflict: 'customer_id,outlet_id' })
+      return existing.id
+    }
+    
+    // Insert new customer
+    const { data: newCust } = await sb.from('customers')
+      .insert({ name, whatsapp, email: email ?? null })
+      .select('id').single()
+    
+    if (newCust?.id) {
+      await sb.from('customer_outlets').insert({
+        customer_id: newCust.id, outlet_id: outletId,
+        visit_count: 1, total_spent_here: 0,
+        last_visit_at: new Date().toISOString()
+      })
+      return newCust.id
+    }
+  } catch (e) {
+    console.error('upsertCustomer fallback error:', e)
+  }
+  return null
 }
 
 export async function getCustomersByOutlet(outletId: string): Promise<Customer[]> {
