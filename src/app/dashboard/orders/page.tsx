@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { getLiveOrders, getOrdersByOutlet, updateOrderStatus, confirmPayment } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/client'
