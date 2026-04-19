@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState, useRef } from 'react'
 import { getAllBannersByOutlet, upsertBanner, deleteBanner } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/client'
