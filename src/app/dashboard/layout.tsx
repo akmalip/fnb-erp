@@ -78,6 +78,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {sidebarOpen && <div className="db-overlay" onClick={() => setSidebarOpen(false)} />}
 
       <main className="db-main">{children}</main>
+      <div style={{ position: 'fixed', bottom: 12, right: 16, fontSize: 11, color: 'rgba(0,0,0,0.25)', zIndex: 10, pointerEvents: 'auto' }}>
+        Powered by{' '}
+        <a href="https://hallogroup.id" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(0,0,0,0.35)', textDecoration: 'none', fontWeight: 600 }}>
+          Hallo Group
+        </a>
+      </div>
     </div>
   )
 }
