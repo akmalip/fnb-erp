@@ -6,12 +6,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
-  { href: '/dashboard',           icon: '▤',  label: 'Overview' },
-  { href: '/dashboard/orders',    icon: '🧾', label: 'Live Orders' },
-  { href: '/dashboard/menu',      icon: '📋', label: 'Menu' },
-  { href: '/dashboard/banners',   icon: '🖼', label: 'Banners & Promos' },
-  { href: '/dashboard/customers', icon: '👥', label: 'Customers' },
-  { href: '/dashboard/settings',  icon: '⚙',  label: 'Settings' },
+  { href: '/dashboard',           icon: '▤',  label: 'Overview',         group: 'Operasional' },
+  { href: '/dashboard/orders',    icon: '🧾', label: 'Live Orders',       group: 'Operasional' },
+  { href: '/dashboard/pos',       icon: '🖥', label: 'POS Kasir',         group: 'Operasional' },
+  { href: '/dashboard/menu',      icon: '📋', label: 'Menu',              group: 'Operasional' },
+  { href: '/dashboard/banners',   icon: '🖼', label: 'Banners & Promos',  group: 'Operasional' },
+  { href: '/dashboard/finance',   icon: '💰', label: 'Keuangan',          group: 'Bisnis' },
+  { href: '/dashboard/stock',     icon: '📦', label: 'Stok & Inventori',  group: 'Bisnis' },
+  { href: '/dashboard/customers', icon: '👥', label: 'Pelanggan',         group: 'Bisnis' },
+  { href: '/dashboard/settings',  icon: '⚙',  label: 'Settings',          group: 'Sistem' },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -52,16 +55,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="sb-outlet">{outletName}</div>
         </div>
         <nav className="sb-nav">
-          {NAV.map(n => {
-            const active = n.href === '/dashboard' ? pathname === n.href : pathname.startsWith(n.href)
-            return (
-              <Link key={n.href} href={n.href} className={`nav-item ${active ? 'active' : ''}`}
-                onClick={() => setSidebarOpen(false)}>
-                <span className="nav-icon">{n.icon}</span>
-                <span>{n.label}</span>
-              </Link>
-            )
-          })}
+          {['Operasional', 'Bisnis', 'Sistem'].map(group => (
+            <div key={group}>
+              <div className="sb-group-label">{group}</div>
+              {NAV.filter(n => n.group === group).map(n => {
+                const active = n.href === '/dashboard' ? pathname === n.href : pathname.startsWith(n.href)
+                return (
+                  <Link key={n.href} href={n.href} className={`nav-item ${active ? 'active' : ''}`}
+                    onClick={() => setSidebarOpen(false)}>
+                    <span className="nav-icon">{n.icon}</span>
+                    <span>{n.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
         </nav>
         <button className="sb-logout" onClick={handleLogout}>Sign out</button>
       </aside>
@@ -105,6 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .sb-outlet { font-size: 15px; font-weight: 700; color: white; }
 
         .sb-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+        .sb-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.25); padding: 12px 12px 4px; }
         .nav-item {
           display: flex; align-items: center; gap: 12px; padding: 10px 12px;
           border-radius: 10px; color: rgba(255,255,255,0.55); text-decoration: none;
