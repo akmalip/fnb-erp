@@ -52,6 +52,8 @@ export default function LoginPage() {
         localStorage.setItem('fnb_outlet_id', outlet.id)
         localStorage.setItem('fnb_outlet_slug', outlet.slug)
         localStorage.setItem('fnb_outlet_name', outlet.name)
+        localStorage.setItem('fnb_outlet_role', ouData[0].role || 'owner')
+        localStorage.setItem('fnb_user_id', data.user.id)
       }
 
       router.push('/dashboard')
