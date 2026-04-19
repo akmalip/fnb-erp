@@ -666,6 +666,15 @@ export default function OrderPage({ outlet, initialMenu, initialBanners }: {
         .done-order-number { font-size: 24px; font-weight: 800; color: var(--brand-primary); margin-bottom: 16px; }
         .done-meta { background: var(--brand-accent); border-radius: 12px; padding: 16px; margin: 20px 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600; text-align: left; }
       `}</style>
+
+      {/* Hallo Group watermark */}
+      <div style={{ textAlign: 'center', padding: '20px 0 12px', fontSize: 11, color: 'rgba(0,0,0,0.25)' }}>
+        Powered by{' '}
+        <a href="https://hallogroup.id" target="_blank" rel="noopener noreferrer"
+          style={{ color: 'rgba(0,0,0,0.35)', textDecoration: 'none', fontWeight: 600 }}>
+          Hallo Group
+        </a>
+      </div>
     </div>
   )
 }
