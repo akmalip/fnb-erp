@@ -54,16 +54,46 @@ export default function POSPage() {
     const slug = localStorage.getItem('fnb_outlet_slug') || ''
     setOutletId(id)
     setOutletSlug(slug)
-    if (id) { loadMenu(id); subscribeOrders(id) }
-    return () => {
-      if (channelRef.current) {
-        sb.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
+    if (id) {
+      loadMenu(id)
+      loadPendingOrders(id)
+      // Poll every 8 seconds instead of realtime to avoid channel errors
+      const interval = setInterval(() => loadPendingOrders(id), 8000)
+      return () => clearInterval(interval)
     }
   }, [])
 
-  const loadMenu = async (id: string) => {
+  const loadPendingOrders = async (id: string) => {
+    const { data } = await sb.from('orders')
+      .select('*, order_items(*)')
+      .eq('outlet_id', id)
+      .in('status', ['pending', 'confirmed', 'preparing', 'ready'])
+      .order('created_at', { ascending: false })
+    if (data) {
+      setPendingOrders(prev => {
+        // Play chime if new orders arrived
+        if (data.length > prev.length) {
+          try {
+            const ctx = new AudioContext()
+            ;[880, 1100, 1320].forEach((freq, i) => {
+              const osc = ctx.createOscillator()
+              const gain = ctx.createGain()
+              osc.connect(gain); gain.connect(ctx.destination)
+              osc.frequency.value = freq; osc.type = 'sine'
+              gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15)
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.15)
+              osc.start(ctx.currentTime + i * 0.15)
+              osc.stop(ctx.currentTime + i * 0.15 + 0.2)
+            })
+          } catch {}
+          showToast('🔔 Ada order baru masuk!')
+        }
+        return data
+      })
+    }
+  }
+
+    const loadMenu = async (id: string) => {
     const [catRes, itemRes] = await Promise.all([
       sb.from('menu_categories').select('*').eq('outlet_id', id).eq('is_active', true).order('sort_order'),
       sb.from('menu_items').select('*').eq('outlet_id', id).eq('is_available', true).order('sort_order'),
@@ -72,74 +102,6 @@ export default function POSPage() {
     setMenuItems(itemRes.data || [])
   }
 
-  const channelRef = useRef<any>(null)
-
-  const subscribeOrders = (id: string) => {
-    // Load existing pending orders
-    sb.from('orders').select('*, order_items(*)').eq('outlet_id', id)
-      .in('status', ['pending', 'confirmed', 'preparing', 'ready'])
-      .then(({ data }) => {
-        if (data) setPendingOrders(data)
-      })
-
-    // Cleanup previous channel if exists
-    if (channelRef.current) {
-      sb.removeChannel(channelRef.current)
-      channelRef.current = null
-    }
-
-    // Real-time subscription
-    const channel = sb.channel('pos-orders-' + id)
-    channel.on('postgres_changes', {
-      event: '*', schema: 'public', table: 'orders',
-      filter: `outlet_id=eq.${id}`
-    }, (payload: any) => {
-      if (payload.eventType === 'INSERT') {
-        setPendingOrders(prev => [payload.new, ...prev])
-        showToast('🔔 Order baru masuk dari meja ' + payload.new.table_number)
-        try {
-          const ctx = new AudioContext()
-          ;[880, 1100, 1320].forEach((freq, i) => {
-            const osc = ctx.createOscillator()
-            const gain = ctx.createGain()
-            osc.connect(gain); gain.connect(ctx.destination)
-            osc.frequency.value = freq; osc.type = 'sine'
-            gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15)
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.15)
-            osc.start(ctx.currentTime + i * 0.15)
-            osc.stop(ctx.currentTime + i * 0.15 + 0.2)
-          })
-        } catch {}
-      } else if (payload.eventType === 'UPDATE') {
-        setPendingOrders(prev =>
-          prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o)
-              .filter(o => ['pending','confirmed','preparing','ready'].includes(o.status))
-        )
-      }
-    }).subscribe()
-    channelRef.current = channel
-  }
-
-  const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(''), 3000)
-  }
-
-  // ── BILLS ──
-  const createBill = () => {
-    if (!newBillTable.trim()) return
-    const bill: Bill = {
-      id: Date.now().toString(),
-      label: newBillTable.startsWith('Meja') ? newBillTable : 'Meja ' + newBillTable,
-      items: [], customer: newBillCustomer, createdAt: new Date(),
-      status: 'open', payMethod: 'cash', discount: 0
-    }
-    setBills(prev => [...prev, bill])
-    setActiveBillId(bill.id)
-    setNewBillTable(''); setNewBillCustomer('')
-    setShowNewBillModal(false)
-    setActiveTab('pos')
-  }
 
   const importOrderToBill = async (order: any) => {
     // Fetch order items
