@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 
 function formatRp(n: number) { return 'Rp ' + Math.round(n).toLocaleString('id-ID') }
