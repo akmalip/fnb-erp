@@ -56,6 +56,9 @@ export default function POSPage() {
   const [receiptHeader, setReceiptHeader] = useState('')
   const [receiptFooter, setReceiptFooter] = useState('Terima kasih sudah mampir! 🙏')
   const [showReceiptSettings, setShowReceiptSettings] = useState(false)
+  const [showKOT, setShowKOT] = useState(false)
+  const [kotData, setKotData] = useState<any>(null)
+  const [kotCounter, setKotCounter] = useState(1)
   const sb = createClient()
 
   const showToast = (msg: string) => {
@@ -136,7 +139,7 @@ export default function POSPage() {
     showToast('✅ Bill ' + bill.label + ' dibuat')
   }
 
-  // FIX 1: Import order with all items populated from order_items
+  // FIX 1: Always fetch order_items fresh when importing to ensure data is complete
   const importOrderToBill = async (order: any) => {
     // Check if already imported
     const existing = bills.find(b => b.fromOrderId === order.id)
@@ -147,10 +150,14 @@ export default function POSPage() {
       return
     }
 
-    // Use order_items already fetched with the order
-    const items = order.order_items || []
+    // Always fetch order_items fresh from DB - don't rely on joined data from polling
+    const { data: fetchedItems } = await sb.from('order_items')
+      .select('*')
+      .eq('order_id', order.id)
+    
+    const items = fetchedItems || order.order_items || []
     const billItems: BillItem[] = items.map((i: any) => ({
-      menuItemId: i.menu_item_id || i.id,
+      menuItemId: i.menu_item_id || '',
       name: i.item_name,
       price: i.item_price,
       quantity: i.quantity,
@@ -307,7 +314,53 @@ export default function POSPage() {
     showToast('✅ Pengaturan struk disimpan')
   }
 
-  const printReceipt = () => {
+  // FIX 3: Kitchen Order Ticket (KOT) - struk dapur
+  const printKOT = (bill: Bill, kotNum: number) => {
+    const win = window.open('', '_blank', 'width=320,height=500')
+    if (!win) return
+    const now = new Date()
+    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
+    win.document.write(`
+      <html><head><title>KOT</title>
+      <style>
+        body { font-family: monospace; font-size: 14px; padding: 12px; max-width: 280px; }
+        .center { text-align: center; }
+        .big { font-size: 18px; font-weight: bold; }
+        .line { border-top: 2px dashed #000; margin: 8px 0; }
+        .row { display: flex; justify-content: space-between; font-size: 14px; margin: 4px 0; }
+        .item-name { font-size: 15px; font-weight: bold; margin: 6px 0 2px; }
+        .note { font-size: 12px; color: #333; margin-left: 12px; font-style: italic; }
+        .qty { font-size: 20px; font-weight: bold; }
+      </style></head><body>
+      <div class="center big">KITCHEN ORDER</div>
+      <div class="center" style="font-size:13px">KOT #${String(kotNum).padStart(3,'0')}</div>
+      <div class="line"></div>
+      <div class="row"><span><b>${bill.label}</b></span><span>${bill.customer || 'Guest'}</span></div>
+      <div class="row"><span>Waktu:</span><span>${timeStr}</span></div>
+      <div class="line"></div>
+      ${bill.items.map(item => `
+        <div style="margin: 8px 0; padding-bottom: 6px; border-bottom: 1px dotted #ccc;">
+          <div class="row">
+            <span class="item-name">${item.name}</span>
+            <span class="qty">x${item.quantity}</span>
+          </div>
+          ${item.note ? `<div class="note">📝 ${item.note}</div>` : ''}
+        </div>
+      `).join('')}
+      <div class="line"></div>
+      <div class="center" style="font-size:12px">Total item: ${bill.items.reduce((s,i) => s + i.quantity, 0)} pcs</div>
+      </body></html>
+    `)
+    win.print()
+    setKotCounter(prev => prev + 1)
+  }
+
+  const openKOT = (bill: Bill) => {
+    setKotData(bill)
+    setShowKOT(true)
+  }
+
+    const printReceipt = () => {
     const win = window.open('', '_blank', 'width=380,height=600')
     if (!win || !lastReceipt) return
     const r = lastReceipt
@@ -467,6 +520,10 @@ export default function POSPage() {
                 <button onClick={openPayment} disabled={activeBill.items.length === 0}
                   style={{ width: '100%', padding: 11, borderRadius: 11, background: '#C8873A', border: 'none', color: 'white', fontWeight: 700, fontSize: 13.5, cursor: 'pointer', fontFamily: 'inherit', opacity: activeBill.items.length === 0 ? 0.5 : 1, marginBottom: 5 }}>
                   Proses Pembayaran
+                </button>
+                <button onClick={() => activeBill && printKOT(activeBill, kotCounter)} disabled={activeBill.items.length === 0}
+                  style={{ width: '100%', padding: 8, borderRadius: 9, background: '#EFF6FF', border: '1.5px solid #2C4A7C', color: '#2C4A7C', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit', opacity: activeBill.items.length === 0 ? 0.5 : 1, marginBottom: 5 }}>
+                  🧾 Print KOT (Dapur)
                 </button>
                 <button onClick={() => deleteBill(activeBill.id)}
                   style={{ width: '100%', padding: 6, borderRadius: 7, background: 'transparent', border: 'none', color: '#E24B4A', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
