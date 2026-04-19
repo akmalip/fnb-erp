@@ -12,9 +12,11 @@ const NAV = [
   { href: '/dashboard/pos',       icon: '🖥', label: 'POS Kasir',        group: 'Operasional' },
   { href: '/dashboard/menu',      icon: '📋', label: 'Menu',             group: 'Operasional' },
   { href: '/dashboard/banners',   icon: '🖼', label: 'Banners & Promos', group: 'Operasional' },
+  { href: '/dashboard/promos',    icon: '🏷️', label: 'Promo & Diskon',  group: 'Operasional' },
   { href: '/dashboard/finance',   icon: '💰', label: 'Keuangan',         group: 'Bisnis' },
   { href: '/dashboard/stock',     icon: '📦', label: 'Stok & Inventori', group: 'Bisnis' },
   { href: '/dashboard/customers', icon: '👥', label: 'Pelanggan',        group: 'Bisnis' },
+  { href: '/dashboard/team',      icon: '👤', label: 'Tim & Akses',      group: 'Sistem' },
   { href: '/dashboard/settings',  icon: '⚙',  label: 'Settings',        group: 'Sistem' },
 ]
 
