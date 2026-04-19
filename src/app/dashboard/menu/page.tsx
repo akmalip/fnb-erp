@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { getMenuByOutlet, upsertMenuItem, deleteMenuItem, toggleMenuItemAvailability, upsertCategory, deleteCategory } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/client'
