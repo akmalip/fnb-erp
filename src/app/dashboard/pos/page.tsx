@@ -55,6 +55,12 @@ export default function POSPage() {
     setOutletId(id)
     setOutletSlug(slug)
     if (id) { loadMenu(id); subscribeOrders(id) }
+    return () => {
+      if (channelRef.current) {
+        sb.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
   }, [])
 
   const loadMenu = async (id: string) => {
@@ -66,6 +72,8 @@ export default function POSPage() {
     setMenuItems(itemRes.data || [])
   }
 
+  const channelRef = useRef<any>(null)
+
   const subscribeOrders = (id: string) => {
     // Load existing pending orders
     sb.from('orders').select('*, order_items(*)').eq('outlet_id', id)
@@ -74,15 +82,21 @@ export default function POSPage() {
         if (data) setPendingOrders(data)
       })
 
+    // Cleanup previous channel if exists
+    if (channelRef.current) {
+      sb.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+
     // Real-time subscription
-    sb.channel('pos-orders').on('postgres_changes', {
+    const channel = sb.channel('pos-orders-' + id)
+    channel.on('postgres_changes', {
       event: '*', schema: 'public', table: 'orders',
       filter: `outlet_id=eq.${id}`
     }, (payload: any) => {
       if (payload.eventType === 'INSERT') {
         setPendingOrders(prev => [payload.new, ...prev])
         showToast('🔔 Order baru masuk dari meja ' + payload.new.table_number)
-        // Play chime
         try {
           const ctx = new AudioContext()
           ;[880, 1100, 1320].forEach((freq, i) => {
@@ -97,9 +111,13 @@ export default function POSPage() {
           })
         } catch {}
       } else if (payload.eventType === 'UPDATE') {
-        setPendingOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o).filter(o => ['pending','confirmed','preparing','ready'].includes(o.status)))
+        setPendingOrders(prev =>
+          prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o)
+              .filter(o => ['pending','confirmed','preparing','ready'].includes(o.status))
+        )
       }
     }).subscribe()
+    channelRef.current = channel
   }
 
   const showToast = (msg: string) => {
