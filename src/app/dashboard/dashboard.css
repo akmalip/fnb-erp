@@ -1,0 +1,51 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: #F4F1ED; color: #1A0F0A; }
+
+.db-layout { display: flex; flex-direction: column; min-height: 100vh; }
+
+.db-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: white; border-bottom: 1px solid rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 40;
+}
+.db-menu-btn { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+.db-menu-btn span { display: block; width: 20px; height: 2px; background: #1A0F0A; border-radius: 2px; }
+.db-topbar-name { font-size: 15px; font-weight: 700; }
+.db-topbar-logout { background: none; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; color: #8B7355; }
+
+.db-sidebar {
+  position: fixed; left: -260px; top: 0; bottom: 0; width: 240px;
+  background: #2C1810; z-index: 50; transition: left 0.25s ease;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.db-sidebar.open { left: 0; }
+.db-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 49; }
+
+.db-sb-header { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.db-sb-brand { font-size: 11px; font-weight: 800; letter-spacing: 0.15em; color: #C8873A; margin-bottom: 4px; }
+.db-sb-outlet { font-size: 15px; font-weight: 700; color: white; }
+
+.db-sb-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+.db-sb-group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.25); padding: 12px 12px 4px; }
+
+.db-nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: 10px; color: rgba(255,255,255,0.55); text-decoration: none;
+  font-size: 14px; font-weight: 500; transition: all 0.15s;
+}
+.db-nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+.db-nav-item.active { background: rgba(200,135,58,0.18); color: #C8873A; }
+.db-nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.db-sb-logout { margin: 12px 16px 20px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.35); font-size: 13px; cursor: pointer; }
+
+.db-main { flex: 1; padding: 20px 16px 48px; width: 100%; }
+
+@media (min-width: 768px) {
+  .db-layout { flex-direction: row; }
+  .db-topbar { display: none; }
+  .db-sidebar { position: sticky; left: 0; top: 0; height: 100vh; }
+  .db-overlay { display: none !important; }
+  .db-main { padding: 32px 36px 56px; }
+}
+
