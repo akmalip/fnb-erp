@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { getCustomersByOutlet } from '@/lib/supabase/queries'
 
@@ -45,7 +47,8 @@ export default function CustomersPage() {
       formatDate(c.last_visit_at ?? c.last_visited_at)
     ])
     const allRows = [header, ...rowData]
-    const csv = allRows.map(r => r.map(v => '"' + v + '"').join(',')).join('\n')
+    const csv = allRows.map(r => r.map(v => '"' + v + '"').join(',')).join('
+')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
     a.download = 'customers.csv'
